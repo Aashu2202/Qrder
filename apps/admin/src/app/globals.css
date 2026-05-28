@@ -1,0 +1,208 @@
+@import "tailwindcss";
+
+/* Enable class-based dark mode in Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Brand orange — used as primary accent */
+  --color-brand-50: #fff7ed;
+  --color-brand-100: #ffedd5;
+  --color-brand-200: #fed7aa;
+  --color-brand-300: #fdba74;
+  --color-brand-400: #fb923c;
+  --color-brand-500: #f97316;
+  --color-brand-600: #ea580c;
+  --color-brand-700: #c2410c;
+  --color-brand-800: #9a3412;
+  --color-brand-900: #7c2d12;
+
+  /* Inter feels appropriate — fall back to system stack */
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji";
+}
+
+/* ------ Light theme ------ */
+:root {
+  /* Surfaces */
+  --bg: 250 250 250;            /* zinc-50 */
+  --bg-elevated: 255 255 255;   /* white */
+  --card: 255 255 255;
+  --muted: 244 244 245;         /* zinc-100 */
+  --muted-fg: 113 113 122;      /* zinc-500 */
+
+  /* Text */
+  --fg: 24 24 27;               /* zinc-900 */
+  --fg-strong: 9 9 11;          /* zinc-950 */
+
+  /* Borders */
+  --border: 228 228 231;        /* zinc-200 */
+  --border-strong: 212 212 216; /* zinc-300 */
+
+  /* Tinted surfaces for status pills */
+  --success-bg: 220 252 231;
+  --success-fg: 22 101 52;
+  --warning-bg: 254 243 199;
+  --warning-fg: 146 64 14;
+  --danger-bg: 254 226 226;
+  --danger-fg: 153 27 27;
+  --info-bg: 219 234 254;
+  --info-fg: 30 64 175;
+
+  /* Backwards compatible aliases (existing code reads `rgb(var(--border))`) */
+  --background: var(--bg);
+  --foreground: var(--fg);
+  --muted-foreground: var(--muted-fg);
+
+  /* Subtle shadows */
+  --shadow-soft: 0 1px 2px 0 rgb(0 0 0 / 0.04), 0 1px 1px 0 rgb(0 0 0 / 0.02);
+  --shadow-lift: 0 4px 14px -2px rgb(0 0 0 / 0.06), 0 2px 4px -1px rgb(0 0 0 / 0.04);
+  --shadow-pop:
+    0 10px 30px -10px rgb(0 0 0 / 0.18),
+    0 4px 8px -2px rgb(0 0 0 / 0.06);
+
+  /* Brand gradient — used on hero cards / primary CTAs */
+  --grad-brand: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+  --grad-violet: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+  --grad-emerald: linear-gradient(135deg, #34d399 0%, #059669 100%);
+  --grad-sky: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  --grad-rose: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+}
+
+/* ------ Dark theme ------ */
+.dark {
+  --bg: 9 9 11;                 /* zinc-950 */
+  --bg-elevated: 24 24 27;      /* zinc-900 */
+  --card: 24 24 27;
+  --muted: 39 39 42;            /* zinc-800 */
+  --muted-fg: 161 161 170;      /* zinc-400 */
+
+  --fg: 250 250 250;            /* zinc-50 */
+  --fg-strong: 255 255 255;
+
+  --border: 39 39 42;           /* zinc-800 */
+  --border-strong: 63 63 70;    /* zinc-700 */
+
+  --success-bg: 6 78 59;
+  --success-fg: 167 243 208;
+  --warning-bg: 120 53 15;
+  --warning-fg: 253 230 138;
+  --danger-bg: 127 29 29;
+  --danger-fg: 254 202 202;
+  --info-bg: 30 58 138;
+  --info-fg: 191 219 254;
+
+  --background: var(--bg);
+  --foreground: var(--fg);
+  --muted-foreground: var(--muted-fg);
+
+  --shadow-soft: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-lift: 0 4px 16px -4px rgb(0 0 0 / 0.5);
+  --shadow-pop:
+    0 10px 30px -8px rgb(0 0 0 / 0.6),
+    0 0 0 1px rgb(255 255 255 / 0.04);
+
+  /* Slightly brighter gradients for dark mode pop */
+  --grad-brand: linear-gradient(135deg, #fb923c 0%, #c2410c 100%);
+}
+
+html,
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--fg));
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Subtle gradient background for the app shell */
+body {
+  background-image: radial-gradient(
+    1200px circle at 0% -10%,
+    rgb(254 215 170 / 0.18),
+    transparent 40%
+  );
+  background-attachment: fixed;
+}
+.dark body {
+  background-image: radial-gradient(
+    1000px circle at 0% -10%,
+    rgb(194 65 12 / 0.12),
+    transparent 40%
+  );
+}
+
+/* Selection */
+::selection {
+  background: rgb(var(--brand-200, 254 215 170));
+  color: rgb(var(--brand-900, 124 45 18));
+}
+
+/* Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--border-strong)) transparent;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--border-strong));
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--muted-fg));
+}
+
+/* Smooth focus ring for keyboard nav */
+:focus-visible {
+  outline: 2px solid rgb(var(--brand-500, 249 115 22));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Shimmer animation for skeletons */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgb(var(--muted)) 0%,
+    rgb(var(--border-strong) / 0.6) 50%,
+    rgb(var(--muted)) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 1.6s infinite linear;
+}
+
+/* Slow gentle pulse for "live" indicators */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+.pulse-soft {
+  animation: pulse-soft 2.4s ease-in-out infinite;
+}
+
+/* Glow halo for primary CTAs in dark mode */
+.dark .glow-brand {
+  box-shadow:
+    0 0 0 1px rgb(251 146 60 / 0.4),
+    0 8px 24px -6px rgb(234 88 12 / 0.35);
+}
+
+/* Reduce motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

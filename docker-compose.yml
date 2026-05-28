@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: qrder-postgres
+    environment:
+      POSTGRES_USER: qrder
+      POSTGRES_PASSWORD: qrder
+      POSTGRES_DB: qrder
+    ports:
+      - "5432:5432"
+    volumes:
+      - qrder_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qrder -d qrder"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: qrder-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - qrder_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  qrder_pg_data:
+  qrder_redis_data:

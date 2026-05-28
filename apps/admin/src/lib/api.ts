@@ -1,0 +1,127 @@
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const AUTH_STORAGE_KEY = 'qrder-auth';
+
+export interface ApiError {
+  type: string;
+  title: string;
+  status: number;
+  detail?: string;
+  fields?: Record<string, string[]>;
+}
+
+let accessToken: string | null = null;
+export function setAccessToken(token: string | null) {
+  accessToken = token;
+}
+export function getAccessToken() {
+  return accessToken;
+}
+
+/** Sync the access token into the Zustand persist payload so it survives a reload. */
+function writeTokenToStorage(token: string | null) {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw) as { state: { accessToken: string | null } };
+    parsed.state.accessToken = token;
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(parsed));
+  } catch {
+    /* best-effort */
+  }
+}
+
+/**
+ * Callback the auth store wires up so a failed refresh can clear the session
+ * and redirect the user back to /login.
+ */
+let onAuthFailed: (() => void) | null = null;
+export function setOnAuthFailed(fn: (() => void) | null) {
+  onAuthFailed = fn;
+}
+
+export interface FetchOptions extends Omit<RequestInit, 'body'> {
+  json?: unknown;
+  body?: BodyInit;
+  /** Skip the auto-refresh-on-401 retry. Used internally for the refresh call. */
+  _skipRefresh?: boolean;
+}
+
+async function doFetch(path: string, opts: FetchOptions): Promise<Response> {
+  const headers = new Headers(opts.headers);
+  if (opts.json !== undefined && !headers.has('content-type')) {
+    headers.set('content-type', 'application/json');
+  }
+  if (accessToken) headers.set('authorization', `Bearer ${accessToken}`);
+
+  return fetch(`${API_URL}${path}`, {
+    ...opts,
+    headers,
+    body: opts.json !== undefined ? JSON.stringify(opts.json) : opts.body,
+    credentials: 'include',
+  });
+}
+
+/**
+ * Single-flight refresh: if many requests 401 at once, only one hits
+ * /v1/auth/refresh; the others await the same promise.
+ */
+let refreshInFlight: Promise<boolean> | null = null;
+
+async function tryRefresh(): Promise<boolean> {
+  if (refreshInFlight) return refreshInFlight;
+  refreshInFlight = (async () => {
+    try {
+      const res = await fetch(`${API_URL}/v1/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!res.ok) return false;
+      const data = (await res.json()) as { accessToken: string };
+      setAccessToken(data.accessToken);
+      writeTokenToStorage(data.accessToken);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      // Release the lock on next tick so awaiting callers all see the result.
+      setTimeout(() => {
+        refreshInFlight = null;
+      }, 0);
+    }
+  })();
+  return refreshInFlight;
+}
+
+export async function apiFetch<T>(path: string, opts: FetchOptions = {}): Promise<T> {
+  let res = await doFetch(path, opts);
+
+  // Auto-refresh on 401, retry once. Skip for /v1/auth/* to avoid loops.
+  if (res.status === 401 && !opts._skipRefresh && !path.startsWith('/v1/auth/')) {
+    const refreshed = await tryRefresh();
+    if (refreshed) {
+      res = await doFetch(path, opts);
+    } else {
+      onAuthFailed?.();
+    }
+  }
+
+  if (res.status === 204) return undefined as T;
+
+  const text = await res.text();
+  const data = text ? JSON.parse(text) : null;
+
+  if (!res.ok) {
+    const err: ApiError = data ?? {
+      type: 'about:blank',
+      title: res.statusText,
+      status: res.status,
+    };
+    throw err;
+  }
+
+  return data as T;
+}
+
+export const apiBase = API_URL;
+export const wsUrl = process.env.NEXT_PUBLIC_WS_URL ?? 'http://localhost:4000';
