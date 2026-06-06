@@ -31,7 +31,7 @@ services:
     healthCheckPath: /health
     # db:push syncs the Drizzle schema to Postgres at build time (no migration
     # files are committed, and Free-tier services have no shell to run it manually).
-    buildCommand: pnpm install --frozen-lockfile && pnpm turbo run build --filter=@qrder/api && pnpm --filter @qrder/db db:push
+    buildCommand: pnpm install --frozen-lockfile --prod=false && pnpm turbo run build --filter=@qrder/api && pnpm --filter @qrder/db db:push
     startCommand: pnpm --filter @qrder/api start
     envVars:
       - key: NODE_VERSION
@@ -79,7 +79,7 @@ services:
     runtime: node
     plan: free
     region: oregon
-    buildCommand: pnpm install --frozen-lockfile && pnpm turbo run build --filter=@qrder/customer
+    buildCommand: pnpm install --frozen-lockfile --prod=false && pnpm turbo run build --filter=@qrder/customer
     startCommand: pnpm --filter @qrder/customer exec next start -p $PORT
     envVars:
       - key: NODE_VERSION
@@ -97,7 +97,7 @@ services:
     runtime: node
     plan: free
     region: oregon
-    buildCommand: pnpm install --frozen-lockfile && pnpm turbo run build --filter=@qrder/admin
+    buildCommand: pnpm install --frozen-lockfile --prod=false && pnpm turbo run build --filter=@qrder/admin
     startCommand: pnpm --filter @qrder/admin exec next start -p $PORT
     envVars:
       - key: NODE_VERSION
@@ -115,7 +115,7 @@ services:
     runtime: node
     plan: free
     region: oregon
-    buildCommand: pnpm install --frozen-lockfile && pnpm turbo run build --filter=@qrder/kitchen
+    buildCommand: pnpm install --frozen-lockfile --prod=false && pnpm turbo run build --filter=@qrder/kitchen
     startCommand: pnpm --filter @qrder/kitchen exec next start -p $PORT
     envVars:
       - key: NODE_VERSION
@@ -133,7 +133,7 @@ services:
     runtime: node
     plan: free
     region: oregon
-    buildCommand: pnpm install --frozen-lockfile && pnpm turbo run build --filter=@qrder/pos
+    buildCommand: pnpm install --frozen-lockfile --prod=false && pnpm turbo run build --filter=@qrder/pos
     startCommand: pnpm --filter @qrder/pos exec next start -p $PORT
     envVars:
       - key: NODE_VERSION
