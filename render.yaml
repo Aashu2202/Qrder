@@ -32,7 +32,10 @@ services:
     # db:push syncs the Drizzle schema to Postgres at build time (no migration
     # files are committed, and Free-tier services have no shell to run it manually).
     buildCommand: pnpm install --frozen-lockfile --prod=false && pnpm turbo run build --filter=@qrder/api && pnpm --filter @qrder/db exec drizzle-kit push --force
-    startCommand: pnpm --filter @qrder/api start
+    # Run via tsx (like dev): the compiled dist uses extensionless ESM imports
+    # which Node's native loader rejects. tsx resolves them. Avoids rewriting
+    # every import with .js across the codebase.
+    startCommand: pnpm --filter @qrder/api exec tsx src/index.ts
     envVars:
       - key: NODE_VERSION
         value: "22"
